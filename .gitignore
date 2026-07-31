@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 .env.dev
 .env.prod
+backend/.env
+/data/

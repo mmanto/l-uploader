@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Páginas — l-uploader{% endblock %}
+{% block body %}
+<div class="panel">
+  <nav class="topnav">
+    <a href="/">Páginas</a>
+    <a href="/root-domains">Dominios raíz</a>
+    <a href="/logout">Cerrar sesión</a>
+  </nav>
+  <h1>Páginas</h1>
+
+  {% if ok %}<p class="msg ok">{{ ok }}</p>{% endif %}
+  {% if err %}<p class="msg err">{{ err }}</p>{% endif %}
+
+  {% if pages %}
+  <table>
+    <tr><th>Nombre</th><th>Slug</th><th>Dominios</th><th>Actualizado</th><th></th></tr>
+    {% for p in pages %}
+    <tr>
+      <td><a href="/pages/{{ p.id }}">{{ p.name }}</a></td>
+      <td><code>{{ p.slug }}</code></td>
+      <td>{{ p.domains|length }}</td>
+      <td>{{ p.content_updated_at.strftime("%Y-%m-%d %H:%M") if p.content_updated_at else "—" }}</td>
+      <td><a href="/pages/{{ p.id }}">Administrar</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="empty">Todavía no hay páginas creadas.</p>
+  {% endif %}
+
+  <h2>Crear página</h2>
+  <form method="post" action="/pages" class="row-form">
+    <div>
+      <label>Nombre</label>
+      <input type="text" name="name" required>
+    </div>
+    <div>
+      <label>Slug (carpeta, minúsculas y guiones)</label>
+      <input type="text" name="slug" pattern="[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?" required>
+    </div>
+    <div style="flex: 0 0 auto;">
+      <button type="submit">Crear</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

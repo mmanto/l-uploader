@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ page.name }} — l-uploader{% endblock %}
+{% block body %}
+<div class="panel">
+  <nav class="topnav">
+    <a href="/">Páginas</a>
+    <a href="/root-domains">Dominios raíz</a>
+    <a href="/logout">Cerrar sesión</a>
+  </nav>
+  <h1>{{ page.name }} <small style="color:#475569;font-weight:400">({{ page.slug }})</small></h1>
+
+  {% if ok %}<p class="msg ok">{{ ok }}</p>{% endif %}
+  {% if err %}<p class="msg err">{{ err }}</p>{% endif %}
+
+  <h2>Contenido</h2>
+  <p class="meta" style="margin-bottom:1rem">
+    Última publicación: {{ page.content_updated_at.strftime("%Y-%m-%d %H:%M") if page.content_updated_at else "sin publicar todavía" }}
+  </p>
+  <form method="post" action="/pages/{{ page.id }}/upload" enctype="multipart/form-data" class="row-form">
+    <div>
+      <label>Archivo .zip con el contenido</label>
+      <input type="file" name="file" accept=".zip" required>
+    </div>
+    <div style="flex: 0 0 auto;">
+      <button type="submit">Subir y publicar</button>
+    </div>
+  </form>
+
+  <h2>Dominios</h2>
+  {% if domains %}
+  <table>
+    <tr><th>Hostname</th><th>Tipo</th><th></th></tr>
+    {% for d in domains %}
+    <tr>
+      <td><code>{{ d.hostname }}</code></td>
+      <td>{{ "Subdominio" if d.kind == "subdomain" else "Custom" }}</td>
+      <td>
+        <form method="post" action="/domains/{{ d.id }}/delete" style="display:inline">
+          <button type="submit" class="danger">Quitar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="empty">Esta página todavía no tiene ningún dominio asignado.</p>
+  {% endif %}
+
+  <h2>Agregar subdominio</h2>
+  {% if root_domains %}
+  <form method="post" action="/pages/{{ page.id }}/domains" class="row-form">
+    <input type="hidden" name="kind" value="subdomain">
+    <div>
+      <label>Subdominio</label>
+      <input type="text" name="label" placeholder="cliente1" required>
+    </div>
+    <div>
+      <label>Dominio raíz</label>
+      <select name="root_domain_id" required>
+        {% for rd in root_domains %}
+        <option value="{{ rd.id }}">{{ rd.hostname }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="flex: 0 0 auto;">
+      <button type="submit">Agregar</button>
+    </div>
+  </form>
+  {% else %}
+  <p class="empty">No hay dominios raíz cargados. Agregá uno en <a href="/root-domains">Dominios raíz</a> primero.</p>
+  {% endif %}
+
+  <h2>Agregar dominio propio del cliente</h2>
+  <form method="post" action="/pages/{{ page.id }}/domains" class="row-form">
+    <input type="hidden" name="kind" value="custom">
+    <div>
+      <label>Hostname completo</label>
+      <input type="text" name="hostname" placeholder="www.clientedomain.com" required>
+    </div>
+    <div style="flex: 0 0 auto;">
+      <button type="submit">Agregar</button>
+    </div>
+  </form>
+
+  <h2>Zona de peligro</h2>
+  <form method="post" action="/pages/{{ page.id }}/delete" onsubmit="return confirm('¿Borrar esta página y todo su contenido? Esta acción no se puede deshacer.');">
+    <button type="submit" class="danger">Borrar página</button>
+  </form>
+</div>
+{% endblock %}

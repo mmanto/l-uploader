@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Acceso — l-uploader{% endblock %}
+{% block body %}
+<div class="center-screen">
+  <div class="card">
+    <h1>Acceso — l-uploader</h1>
+    <form method="post" action="/login">
+      <label>Usuario</label>
+      <input type="text" name="username" autocomplete="username" required>
+      <label>Contraseña</label>
+      <input type="password" name="password" autocomplete="current-password" required>
+      <button type="submit">Iniciar sesión</button>
+      {% if error %}<p class="msg err">{{ error }}</p>{% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

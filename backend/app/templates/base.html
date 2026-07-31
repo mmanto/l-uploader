@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}l-uploader{% endblock %}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    a { color: #6366f1; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .center-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    }
+    .card {
+      background: #1a1d2e; border: 1px solid #2d3148; border-radius: 12px;
+      padding: 2.5rem 2rem; width: 100%; max-width: 460px;
+    }
+    .panel { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 { font-size: 1.25rem; margin-bottom: 1.5rem; color: #a5b4fc; }
+    h2 { font-size: 1.05rem; margin: 1.75rem 0 0.75rem; color: #a5b4fc; }
+    nav.topnav { display: flex; gap: 1.25rem; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.35rem; }
+    input[type=text], input[type=password], select {
+      width: 100%; padding: 0.6rem 0.75rem;
+      background: #0f1117; border: 1px solid #2d3148; border-radius: 6px;
+      color: #e2e8f0; font-size: 0.95rem; margin-bottom: 1rem;
+      outline: none;
+    }
+    input[type=text]:focus, input[type=password]:focus, select:focus { border-color: #6366f1; }
+    input[type=file] {
+      width: 100%; padding: 0.6rem 0.75rem;
+      background: #0f1117; border: 1px dashed #4338ca; border-radius: 6px;
+      color: #94a3b8; font-size: 0.875rem; margin-bottom: 1rem; cursor: pointer;
+    }
+    button, .btn {
+      padding: 0.6rem 1.1rem; background: #4f46e5; border: none; border-radius: 6px;
+      color: #fff; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+      display: inline-block;
+    }
+    button:hover, .btn:hover { background: #4338ca; text-decoration: none; }
+    button.danger, .btn.danger { background: #7f1d1d; }
+    button.danger:hover, .btn.danger:hover { background: #991b1b; }
+    .msg { font-size: 0.85rem; margin-bottom: 1rem; padding: 0.6rem 0.75rem; border-radius: 6px; }
+    .msg.ok { background: #14532d; color: #86efac; }
+    .msg.err { background: #450a0a; color: #fca5a5; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid #2d3148; font-size: 0.9rem; }
+    th { color: #94a3b8; font-weight: 500; font-size: 0.8rem; }
+    .empty { color: #475569; font-size: 0.85rem; padding: 0.5rem 0; }
+    .row-form { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
+    .row-form > div { flex: 1; min-width: 160px; }
+    .meta { font-size: 0.75rem; color: #475569; margin-top: 1.5rem; }
+    code { background: #0f1117; border: 1px solid #2d3148; border-radius: 4px; padding: 0.1rem 0.35rem; }
+  </style>
+</head>
+<body>
+{% block body %}{% endblock %}
+</body>
+</html>

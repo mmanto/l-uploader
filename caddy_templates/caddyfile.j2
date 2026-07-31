@@ -1,0 +1,29 @@
+{
+    admin 0.0.0.0:2019
+    email {{ acme_email }}
+}
+
+{{ admin_domain }} {
+{% if tls_internal %}
+    tls internal
+{% endif %}
+    reverse_proxy backend:8000
+}
+
+{% for page in pages %}
+{% for domain in page.domains %}
+{{ domain.hostname }} {
+{% if tls_internal %}
+    tls internal
+{% endif %}
+    root * /srv/pages/{{ page.slug }}
+    encode gzip
+    file_server
+    try_files {path} /index.html
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+    }
+}
+{% endfor %}
+{% endfor %}

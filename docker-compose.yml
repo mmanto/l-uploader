@@ -1,0 +1,46 @@
+services:
+  caddy:
+    image: caddy:2.9-alpine
+    container_name: luploader_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - pages_content:/srv/pages:ro
+    command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile --resume
+    networks:
+      - internal
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: luploader_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.dev
+    environment:
+      - CADDY_ADMIN_URL=http://caddy:2019
+      - DATABASE_URL=sqlite:////data/db/luploader.db
+    volumes:
+      - pages_content:/srv/pages
+      - backend_db:/data/db
+      - ./caddy_templates:/app/caddy_templates:ro
+    depends_on:
+      - caddy
+    networks:
+      - internal
+
+volumes:
+  caddy_data:
+  caddy_config:
+  pages_content:
+  backend_db:
+
+networks:
+  internal:
+    name: luploader_internal

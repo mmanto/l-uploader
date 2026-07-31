@@ -21,12 +21,16 @@ async def dashboard(request: Request, ok: str = "", err: str = ""):
     with get_session() as session:
         pages = list(session.exec(select(Page).order_by(Page.created_at.desc())))
         result = []
+        total_domains = 0
         for p in pages:
             domains = list(session.exec(select(Domain).where(Domain.page_id == p.id)))
+            total_domains += len(domains)
             result.append({**p.model_dump(), "domains": domains})
 
     return templates.TemplateResponse(
-        request, "dashboard.html", {"pages": result, "ok": ok, "err": err}
+        request,
+        "dashboard.html",
+        {"pages": result, "total_domains": total_domains, "ok": ok, "err": err},
     )
 
 

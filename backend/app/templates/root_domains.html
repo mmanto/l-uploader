@@ -1,49 +1,59 @@
 {% extends "base.html" %}
 {% block title %}Dominios raíz — l-uploader{% endblock %}
 {% block body %}
-<div class="panel">
-  <nav class="topnav">
-    <a href="/">Páginas</a>
-    <a href="/root-domains">Dominios raíz</a>
-    <a href="/logout">Cerrar sesión</a>
-  </nav>
-  <h1>Dominios raíz</h1>
-  <p class="meta" style="margin-bottom:1rem">
-    Cada dominio raíz debe tener un registro DNS wildcard propio
-    (<code>*.dominio A &lt;IP del servidor&gt;</code>) configurado una sola vez
-    antes de poder usarse para crear subdominios de páginas.
-  </p>
+<div class="container">
+  {% set active = 'root_domains' %}
+  <div class="topbar">
+    <div>
+      <h1>Dominios raíz</h1>
+      <p>Dominios wildcard disponibles para crear subdominios de páginas.</p>
+    </div>
+    {% include "_nav.html" %}
+  </div>
 
   {% if ok %}<p class="msg ok">{{ ok }}</p>{% endif %}
   {% if err %}<p class="msg err">{{ err }}</p>{% endif %}
 
-  {% if root_domains %}
-  <table>
-    <tr><th>Hostname</th><th></th></tr>
-    {% for rd in root_domains %}
-    <tr>
-      <td><code>{{ rd.hostname }}</code></td>
-      <td>
-        <form method="post" action="/root-domains/{{ rd.id }}/delete" style="display:inline">
-          <button type="submit" class="danger">Quitar</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% else %}
-  <p class="empty">Todavía no hay dominios raíz cargados.</p>
-  {% endif %}
+  <div class="section">
+    <p class="meta" style="margin-bottom:1rem; margin-top:0">
+      Cada dominio raíz debe tener un registro DNS wildcard propio
+      (<code>*.dominio A &lt;IP del servidor&gt;</code>) configurado una sola vez
+      antes de poder usarse para crear subdominios de páginas.
+    </p>
 
-  <h2>Agregar dominio raíz</h2>
-  <form method="post" action="/root-domains" class="row-form">
-    <div>
-      <label>Hostname</label>
-      <input type="text" name="hostname" placeholder="intellify.pro" required>
+    <h2>Dominios raíz cargados</h2>
+    {% if root_domains %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Hostname</th><th></th></tr></thead>
+        <tbody>
+          {% for rd in root_domains %}
+          <tr>
+            <td><code>{{ rd.hostname }}</code></td>
+            <td>
+              <form method="post" action="/root-domains/{{ rd.id }}/delete" style="display:inline">
+                <button type="submit" class="danger">Quitar</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    <div style="flex: 0 0 auto;">
-      <button type="submit">Agregar</button>
-    </div>
-  </form>
+    {% else %}
+    <p class="empty">Todavía no hay dominios raíz cargados.</p>
+    {% endif %}
+
+    <h2>Agregar dominio raíz</h2>
+    <form method="post" action="/root-domains" class="row-form">
+      <div>
+        <label>Hostname</label>
+        <input type="text" name="hostname" placeholder="intellify.pro" required>
+      </div>
+      <div style="flex: 0 0 auto;">
+        <button type="submit">Agregar</button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

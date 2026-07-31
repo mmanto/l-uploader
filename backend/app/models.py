@@ -38,3 +38,32 @@ class Domain(SQLModel, table=True):
     hostname: str = Field(unique=True, index=True)
     kind: str  # "subdomain" | "custom"
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class HostingerDomain(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    hostname: str = Field(unique=True, index=True)
+    expires_at: Optional[str] = None
+    subscription_id: Optional[str] = None
+    subdomains: Optional[str] = None
+    server: Optional[str] = None
+    dns_info: Optional[str] = None
+    environment: Optional[str] = None
+    responsible: Optional[str] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class HostingerVps(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    vps_id: str = Field(unique=True, index=True)
+    plan: Optional[str] = None
+    expires_at: Optional[str] = None
+    subscription_id: Optional[str] = None
+    ip: Optional[str] = None
+    domains_hosted: Optional[str] = None
+    services: Optional[str] = None
+    environment: Optional[str] = None
+    responsible: Optional[str] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)

@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}Recursos Hostinger — l-uploader{% endblock %}
+{% block body %}
+<div class="container">
+  {% set active = 'resources' %}
+  <div class="topbar">
+    <div>
+      <h1>Recursos Hostinger</h1>
+      <p>Mapeo de dominios y servidores contratados. Editable a mano, sin dependencia de una API externa.</p>
+    </div>
+    {% include "_nav.html" %}
+  </div>
+
+  <div class="cards">
+    <div class="stat-card">
+      <div class="label">Dominios</div>
+      <div class="value">{{ domain_rows|length }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">VPS</div>
+      <div class="value">{{ vps_rows|length }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Vencen en &le; {{ 60 }} días</div>
+      <div class="value">{{ expiring_soon }}</div>
+    </div>
+  </div>
+
+  {% if ok %}<p class="msg ok">{{ ok }}</p>{% endif %}
+  {% if err %}<p class="msg err">{{ err }}</p>{% endif %}
+
+  <div class="section">
+    <h2 style="margin-top:0">Dominios</h2>
+    {% if domain_rows %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Dominio</th><th>Expira</th><th>Suscripción</th><th>Subdominios</th>
+            <th>Servidor / hosting</th><th>DNS / nameservers</th><th>Entorno</th>
+            <th>Responsable</th><th>Notas</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in domain_rows %}
+          {% set d = row.item %}
+          <tr>
+            <td><code>{{ d.hostname }}</code></td>
+            <td>
+              {% if row.expires_warn %}<span class="badge warn">{{ d.expires_at }}</span>
+              {% elif d.expires_at %}{{ d.expires_at }}
+              {% else %}<span class="muted">A confirmar</span>{% endif %}
+            </td>
+            <td>{{ d.subscription_id or "" }}</td>
+            <td>{{ d.subdomains or "A confirmar" }}</td>
+            <td>{{ d.server or "A confirmar" }}</td>
+            <td>{{ d.dns_info or "A confirmar" }}</td>
+            <td>{{ d.environment or "A confirmar" }}</td>
+            <td>{{ d.responsible or "A confirmar" }}</td>
+            <td class="muted">{{ d.notes or "" }}</td>
+            <td>
+              <a href="/resources?edit_domain={{ d.id }}">Editar</a>
+              <form method="post" action="/resources/domains/{{ d.id }}/delete" style="display:inline" onsubmit="return confirm('¿Quitar este dominio del mapeo?');">
+                <button type="submit" class="danger">Quitar</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">Todavía no hay dominios cargados en el mapeo.</p>
+    {% endif %}
+
+    <h2>{{ "Editar dominio" if domain_to_edit else "Agregar dominio" }}</h2>
+    <form method="post" action="{{ '/resources/domains/%d' % domain_to_edit.id if domain_to_edit else '/resources/domains' }}">
+      <div class="form-grid">
+        <div>
+          <label>Dominio</label>
+          <input type="text" name="hostname" placeholder="ejemplo.com" value="{{ (domain_to_edit.hostname or '') if domain_to_edit else '' }}" required>
+        </div>
+        <div>
+          <label>Expira (AAAA-MM-DD)</label>
+          <input type="text" name="expires_at" placeholder="2027-01-01" value="{{ (domain_to_edit.expires_at or '') if domain_to_edit else '' }}">
+        </div>
+        <div>
+          <label>ID de suscripción</label>
+          <input type="text" name="subscription_id" value="{{ (domain_to_edit.subscription_id or '') if domain_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Subdominios</label>
+          <input type="text" name="subdomains" placeholder="www, api" value="{{ (domain_to_edit.subdomains or '') if domain_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Servidor / hosting</label>
+          <input type="text" name="server" value="{{ (domain_to_edit.server or '') if domain_to_edit else '' }}">
+        </div>
+        <div>
+          <label>DNS / nameservers</label>
+          <input type="text" name="dns_info" value="{{ (domain_to_edit.dns_info or '') if domain_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Entorno</label>
+          <input type="text" name="environment" placeholder="prod / staging / dev" value="{{ (domain_to_edit.environment or '') if domain_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Responsable</label>
+          <input type="text" name="responsible" value="{{ (domain_to_edit.responsible or '') if domain_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Notas</label>
+          <input type="text" name="notes" value="{{ (domain_to_edit.notes or '') if domain_to_edit else '' }}">
+        </div>
+      </div>
+      <button type="submit">{{ "Guardar" if domain_to_edit else "Agregar" }}</button>
+      {% if domain_to_edit %}<a href="/resources" class="btn ghost">Cancelar</a>{% endif %}
+    </form>
+  </div>
+
+  <div class="section">
+    <h2 style="margin-top:0">Servidores (VPS)</h2>
+    {% if vps_rows %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>VPS ID</th><th>Plan</th><th>Expira</th><th>Suscripción</th><th>IP</th>
+            <th>Dominios alojados</th><th>Servicios</th><th>Entorno</th>
+            <th>Responsable</th><th>Notas</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in vps_rows %}
+          {% set v = row.item %}
+          <tr>
+            <td><code>{{ v.vps_id }}</code></td>
+            <td>{{ v.plan or "A confirmar" }}</td>
+            <td>
+              {% if row.expires_warn %}<span class="badge warn">{{ v.expires_at }}</span>
+              {% elif v.expires_at %}{{ v.expires_at }}
+              {% else %}<span class="muted">A confirmar</span>{% endif %}
+            </td>
+            <td>{{ v.subscription_id or "" }}</td>
+            <td>{{ v.ip or "A confirmar" }}</td>
+            <td>{{ v.domains_hosted or "A confirmar" }}</td>
+            <td>{{ v.services or "A confirmar" }}</td>
+            <td>{{ v.environment or "A confirmar" }}</td>
+            <td>{{ v.responsible or "A confirmar" }}</td>
+            <td class="muted">{{ v.notes or "" }}</td>
+            <td>
+              <a href="/resources?edit_vps={{ v.id }}">Editar</a>
+              <form method="post" action="/resources/vps/{{ v.id }}/delete" style="display:inline" onsubmit="return confirm('¿Quitar este VPS del mapeo?');">
+                <button type="submit" class="danger">Quitar</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">Todavía no hay servidores cargados en el mapeo.</p>
+    {% endif %}
+
+    <h2>{{ "Editar VPS" if vps_to_edit else "Agregar VPS" }}</h2>
+    <form method="post" action="{{ '/resources/vps/%d' % vps_to_edit.id if vps_to_edit else '/resources/vps' }}">
+      <div class="form-grid">
+        <div>
+          <label>VPS ID</label>
+          <input type="text" name="vps_id" placeholder="1507469" value="{{ (vps_to_edit.vps_id or '') if vps_to_edit else '' }}" required>
+        </div>
+        <div>
+          <label>Plan</label>
+          <input type="text" name="plan" placeholder="KVM 2" value="{{ (vps_to_edit.plan or '') if vps_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Expira (AAAA-MM-DD)</label>
+          <input type="text" name="expires_at" placeholder="2026-08-18" value="{{ (vps_to_edit.expires_at or '') if vps_to_edit else '' }}">
+        </div>
+        <div>
+          <label>ID de suscripción</label>
+          <input type="text" name="subscription_id" value="{{ (vps_to_edit.subscription_id or '') if vps_to_edit else '' }}">
+        </div>
+        <div>
+          <label>IP</label>
+          <input type="text" name="ip" value="{{ (vps_to_edit.ip or '') if vps_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Dominios alojados</label>
+          <input type="text" name="domains_hosted" value="{{ (vps_to_edit.domains_hosted or '') if vps_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Servicios</label>
+          <input type="text" name="services" placeholder="web, API, BD" value="{{ (vps_to_edit.services or '') if vps_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Entorno</label>
+          <input type="text" name="environment" placeholder="prod / staging / dev" value="{{ (vps_to_edit.environment or '') if vps_to_edit else '' }}">
+        </div>
+        <div>
+          <label>Responsable</label>
+          <input type="text" name="responsible" value="{{ (vps_to_edit.responsible or '') if vps_to_edit else '' }}">
+        </div>
+      </div>
+      <div>
+        <label>Notas</label>
+        <input type="text" name="notes" value="{{ (vps_to_edit.notes or '') if vps_to_edit else '' }}">
+      </div>
+      <button type="submit">{{ "Guardar" if vps_to_edit else "Agregar" }}</button>
+      {% if vps_to_edit %}<a href="/resources" class="btn ghost">Cancelar</a>{% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

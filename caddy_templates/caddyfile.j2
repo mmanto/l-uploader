@@ -4,7 +4,7 @@
 }
 
 {{ admin_domain }} {
-{% if tls_internal %}
+{% if admin_tls_internal %}
     tls internal
 {% endif %}
     reverse_proxy backend:8000
@@ -13,7 +13,7 @@
 {% for page in pages %}
 {% for domain in page.domains %}
 {{ domain.hostname }} {
-{% if tls_internal %}
+{% if pages_tls_internal %}
     tls internal
 {% endif %}
     root * /srv/pages/{{ page.slug }}

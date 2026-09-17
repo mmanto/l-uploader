@@ -4,7 +4,7 @@ import httpx
 from jinja2 import Environment, FileSystemLoader
 from sqlmodel import Session, select
 
-from .models import Domain, Page
+from .models import Domain, Page, Proposal
 
 CADDY_ADMIN_URL = os.environ.get("CADDY_ADMIN_URL", "http://caddy:2019")
 ADMIN_DOMAIN = os.environ.get("ADMIN_DOMAIN", "panel.local.test")
@@ -30,14 +30,23 @@ class CaddySyncError(Exception):
 def build_caddyfile(session: Session) -> str:
     pages = list(session.exec(select(Page)))
     pages_with_domains = []
+    page_hostnames = set()
     for page in pages:
         domains = list(session.exec(select(Domain).where(Domain.page_id == page.id)))
+        page_hostnames.update(d.hostname for d in domains)
         if domains:
             pages_with_domains.append({"slug": page.slug, "domains": domains})
+
+    proposal_hosts = {p.hostname for p in session.exec(select(Proposal))}
+    # Dominios que solo publican propuestas (sin landing propia) necesitan su
+    # propio site block. El del panel no se duplica.
+    proposal_only_hosts = sorted(proposal_hosts - page_hostnames - {ADMIN_DOMAIN})
 
     tpl = _env.get_template("caddyfile.j2")
     return tpl.render(
         pages=pages_with_domains,
+        proposal_hosts=proposal_hosts,
+        proposal_only_hosts=proposal_only_hosts,
         admin_domain=ADMIN_DOMAIN,
         acme_email=ACME_EMAIL,
         pages_tls_internal=(CADDY_TLS_MODE == "internal"),

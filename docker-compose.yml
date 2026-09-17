@@ -11,6 +11,7 @@ services:
       - ./data/caddy_data:/data
       - ./data/caddy_config:/config
       - ./data/pages:/srv/pages:ro
+      - ./data/proposals:/srv/proposals:ro
     command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile --resume
     networks:
       - internal
@@ -28,6 +29,7 @@ services:
       - DATABASE_URL=sqlite:////data/db/luploader.db
     volumes:
       - ./data/pages:/srv/pages
+      - ./data/proposals:/srv/proposals
       - ./data/db:/data/db
       - ./caddy_templates:/app/caddy_templates:ro
     depends_on:

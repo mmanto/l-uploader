@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Propuestas — l-uploader{% endblock %}
+{% block body %}
+<div class="container">
+  {% set active = 'proposals' %}
+  <div class="topbar">
+    <div>
+      <h1>Propuestas</h1>
+      <p>Documentación HTML por cliente, publicada en <code>https://&lt;dominio&gt;/propuestas/&lt;hash&gt;</code>.</p>
+    </div>
+    {% include "_nav.html" %}
+  </div>
+
+  {% if ok %}<p class="msg ok">{{ ok }}</p>{% endif %}
+  {% if err %}<p class="msg err">{{ err }}</p>{% endif %}
+
+  <div class="section">
+    <h2>Propuestas publicadas</h2>
+    {% if proposals %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Cliente</th><th>Dominio</th><th>Link</th><th>Publicado</th><th>Contenido</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for p in proposals %}
+          <tr>
+            <td>{{ p.client }}</td>
+            <td><code>{{ p.hostname }}</code></td>
+            <td>
+              <a href="{{ p.url }}" target="_blank" rel="noopener"><code>{{ p.token }}</code></a>
+              <button type="button" class="ghost" data-url="{{ p.url }}" onclick="copiarLink(this)">Copiar link</button>
+            </td>
+            <td>{{ p.content_updated_at.strftime("%Y-%m-%d %H:%M") if p.content_updated_at else "sin publicar" }}</td>
+            <td style="min-width:250px">
+              <form method="post" action="/propuestas/{{ p.id }}/upload" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".zip,.html,.htm" required style="margin:0 0 .5rem">
+                <button type="submit">Subir y publicar</button>
+              </form>
+            </td>
+            <td>
+              <form method="post" action="/propuestas/{{ p.id }}/delete" onsubmit="return confirm('¿Borrar esta propuesta? El link dejará de funcionar.');">
+                <button type="submit" class="danger">Borrar</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">Todavía no hay propuestas publicadas.</p>
+    {% endif %}
+
+    <h2>Nueva propuesta</h2>
+    <form method="post" action="/propuestas" class="row-form">
+      <div>
+        <label>Cliente</label>
+        <input type="text" name="client" required>
+      </div>
+      <div>
+        <label>Dominio donde se publica</label>
+        <input type="text" name="hostname" list="proposal-hosts" placeholder="kairosgroup.ar" required>
+        <datalist id="proposal-hosts">
+          {% for hostname in hostnames %}<option value="{{ hostname }}"></option>{% endfor %}
+        </datalist>
+      </div>
+      <div style="flex: 0 0 auto;">
+        <button type="submit">Crear</button>
+      </div>
+    </form>
+    <p class="meta">
+      El hash se genera al crear la propuesta y no cambia: el link que le pasás al cliente queda fijo y el contenido
+      se puede reemplazar las veces que haga falta. Subí un <code>.zip</code> con <code>index.html</code> y su CSS
+      (relativo al index), o un único <code>.html</code> con el CSS embebido. Solo quien tiene el link puede verla.
+    </p>
+  </div>
+</div>
+
+<script>
+  // Copia el link público de la propuesta. Usa la Clipboard API cuando está
+  // disponible (https) y cae a execCommand si el navegador la bloquea.
+  function copiarLink(btn) {
+    const url = btn.dataset.url;
+    const fallback = () => {
+      const field = document.createElement('textarea');
+      field.value = url;
+      field.setAttribute('readonly', '');
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      document.body.appendChild(field);
+      field.select();
+      let copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } catch (e) {
+        copied = false;
+      }
+      field.remove();
+      btn.textContent = copied ? 'Copiado' : 'No se pudo copiar';
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(
+        () => { btn.textContent = 'Copiado'; },
+        fallback
+      );
+    } else {
+      fallback();
+    }
+  }
+</script>
+{% endblock %}

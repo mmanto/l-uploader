@@ -6,7 +6,7 @@ from sqlmodel import select
 from .caddy_sync import CaddySyncError, resync
 from .db import get_session, init_db
 from .models import HostingerDomain, HostingerVps
-from .routes import auth_routes, domains, pages, resources, root_domains
+from .routes import auth_routes, domains, pages, proposals, resources, root_domains
 
 logger = logging.getLogger("luploader")
 
@@ -17,6 +17,7 @@ app.include_router(pages.router)
 app.include_router(domains.router)
 app.include_router(root_domains.router)
 app.include_router(resources.router)
+app.include_router(proposals.router)
 
 
 def seed_resources_if_empty(session) -> None:

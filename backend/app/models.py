@@ -1,4 +1,5 @@
 import re
+import secrets
 from datetime import datetime
 from typing import Optional
 
@@ -38,6 +39,25 @@ class Domain(SQLModel, table=True):
     hostname: str = Field(unique=True, index=True)
     kind: str  # "subdomain" | "custom"
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Proposal(SQLModel, table=True):
+    """Documentación HTML de un cliente, publicada en https://<hostname>/propuestas/<token>.
+
+    El token es la única credencial: quien lo tiene puede leer la propuesta.
+    """
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    client: str
+    token: str = Field(unique=True, index=True)
+    hostname: str = Field(index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    content_updated_at: Optional[datetime] = None
+
+
+def new_proposal_token() -> str:
+    """Token opaco de 128 bits (32 caracteres hex) usable en una ruta URL."""
+    return secrets.token_hex(16)
 
 
 class HostingerDomain(SQLModel, table=True):

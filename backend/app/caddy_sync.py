@@ -10,9 +10,11 @@ CADDY_ADMIN_URL = os.environ.get("CADDY_ADMIN_URL", "http://caddy:2019")
 ADMIN_DOMAIN = os.environ.get("ADMIN_DOMAIN", "panel.local.test")
 ACME_EMAIL = os.environ.get("ACME_EMAIL", "admin@example.com")
 CADDY_TLS_MODE = os.environ.get("CADDY_TLS_MODE", "auto")  # "auto" | "internal", páginas de clientes
-# El panel de admin solo lo usa el operador: por defecto usa el CA local de Caddy
-# (sin depender de ACME/DNS público) salvo que se pida explícitamente un cert real.
-ADMIN_TLS_MODE = os.environ.get("ADMIN_TLS_MODE", "internal")  # "auto" | "internal"
+# El panel de admin se publica en un dominio real: por defecto emite con ACME
+# (Let's Encrypt) y deja el CA local de Caddy como respaldo, para que el panel siga
+# accesible si ACME/DNS falla. "internal" fuerza solo el CA local (entornos donde
+# el dominio del panel no resuelve públicamente, p. ej. panel.local.test).
+ADMIN_TLS_MODE = os.environ.get("ADMIN_TLS_MODE", "auto")  # "auto" | "internal"
 
 _TEMPLATE_DIR = os.environ.get(
     "CADDY_TEMPLATE_DIR",
